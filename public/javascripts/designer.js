@@ -138,27 +138,6 @@ define(
       this.hex = hex;
     }
 
-    var channels = [
-      new Channel('blue', 'Blue Moon', '#358CCE'),
-      new Channel('red', 'Red Baloon', '#e81e1e'),
-      new Channel('pink', 'Pink Heart', '#e3197b'),
-      new Channel('purple', 'Purple Horseshoe', '#9f27cf'),
-      new Channel('green', 'Green Clover', '#71b806'),
-      new Channel('yellow', 'Yellow Pot of Gold', '#e8d71e'),
-      new Channel('orange', 'Orange Star', '#ff7b00'),
-      new Channel(Ceci.emptyChannel, 'Disabled', '#444')
-    ];
-
-    // get a Channel object given a channel name
-    function getChannelByChannelName(channelName) {
-      for (var i in channels) {
-        if(channels[i].name === channelName) {
-          return channels[i];
-        }
-      }
-      return false;
-    }
-
     // empty the list of currently selected elements on the page
     var clearSelection = function() {
       selection = [];
@@ -405,47 +384,6 @@ define(
       // $(this).closest(".channel-menu").remove();
       $(this).parent().hide();
     });
-    document.addEventListener('log', function(event) {
-      try {
-        var scroll = $('.log .scroll');
-        var eltthum;
-        if (event.detail.speaker) {
-          eltthum = $("<a class='speaker' elementid='" + event.detail.speaker.id + "'>" + event.detail.speaker.localName.replace('app-', '') + "</a>");
-          eltthum.on('click', function(elt) {
-            var eltid = elt.currentTarget.getAttribute('elementid');
-            var newelt = $("#" + eltid)[0];
-            Ceci.elementWantsAttention(newelt);
-            selectComponent($(newelt));
-          });
-        }
-        var line = $('<li></li>');
-        var channelthumb;
-        if (event.detail.channel) {
-          var channel = getChannelByChannelName(event.detail.channel);
-          channelthumb = $("<span class='channel'>" + channel.name + "</span>");
-          channelthumb.css('backgroundColor', convertHex(channel.hex, 70));
-        } else {
-          channelthumb = $("<span class='channel'>&nbsp;</span>");
-          channelthumb.css('backgroundColor', "rgba(102, 102, 102, .2)");
-        }
-        line.append(channelthumb);
-        var payload = $("<div class='payload new'/>");
-        if (eltthum) payload.append(eltthum);
-        payload.append(" <span class='message'>" + event.detail.message + "</span>");
-        line.append(payload);
-        scroll.append(line);
-        payload.focus(); // needed for bg animation
-        payload.removeClass('new');
-        if (event.detail.severity == Ceci.LOG_WTF) {
-          line.addClass('severity').addClass('wtf');
-        }
-        scroll[0].scrollTop = scroll[0].scrollHeight;
-      } catch (e) {
-        console.log(e);
-        console.log(e.message);
-      }
-    });
-    Ceci.log("AppMaker designer is ready.", "");
 
     var selectComponent = function(comp) {
 
