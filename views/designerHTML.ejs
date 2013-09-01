@@ -10,8 +10,8 @@
   <button class="btn-std btn-md new">New App</button>
 
   <div class="customize-btn"></div>
-  <div class="note hidden">
-    App Saved
+  <div class="note">
+    App Saved <span id="time"></span>
   </div>
 
   <div class="tray">
@@ -31,8 +31,6 @@
       <div class="ceci-card">
         <div class="fixed-top"></div>
         <div class="phone-canvas">
-          <app-button buttonLabel="Click Me"></app-button>
-          <app-counter></app-counter>
         </div>
         <div class="fixed-bottom"></div>
       </div>
@@ -41,10 +39,14 @@
   </div>
   <div class="broadcast-column">
   </div>
-  <div class="log">
-    <ul class="scroll"></ul>
-    <button class="small-btn log-toggle"></button>
+
+  <div class="log-wrapper">
+    <div class="log">
+      <ul class="scroll"></ul>
+      <button class="small-btn log-toggle"></button>
+    </div>
   </div>
+
 </div>
 
 <div class="channel-menu channel-menu-template">
@@ -78,3 +80,4 @@
     </div>
   </div>
 </div>
+
