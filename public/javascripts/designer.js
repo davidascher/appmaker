@@ -149,21 +149,6 @@ define(
       new Channel(Ceci.emptyChannel, 'Disabled', '#444')
     ];
 
-    //TODO: Angular this up
-    // generate the channels list (colored clickable boxes) and append to the page
-    function getChannelStrip(forAttribute) {
-      var strip = $('<div class="colorstrip" id="strip-' + forAttribute + '"></div>');
-
-      for (var i in channels) {
-        var rdata = channels[i];
-
-        strip.append(
-          $('<div class="colorChoice '+ rdata.name +'" value="'+ rdata.hex +'" name="'+ rdata.name +'" title="'+ rdata.title +'" style="background-color: '+ rdata.hex +'"></div>')
-        );
-      }
-      return strip;
-    }
-
     // get a Channel object given a channel name
     function getChannelByChannelName(channelName) {
       for (var i in channels) {
@@ -235,13 +220,6 @@ define(
         });
     });
 
-    var displayBroadcastChannel = function () {
-      var bo = $(".broadcast-options");
-      bo.html("");
-      var strip = getChannelStrip("broadcast");
-      bo.append(strip);
-    };
-
     var getPotentialListeners = function(element) {
       return element.subscriptionListeners.map(function(listener) {
         var subscription;
@@ -258,13 +236,6 @@ define(
         }
         return subscription;
       });
-    };
-
-    var displayListenChannel = function (attribute) {
-      var lo = $(".listen-options");
-      lo.html("");
-      var strip = getChannelStrip(attribute);
-      lo.append(strip);
     };
 
     var getAttributeUIElement = function(element, attributeName, definition) {
@@ -524,7 +495,6 @@ define(
         // change broadcast "color"
         if (comp.parents().hasClass('broadcast-menu')) {
           element.setBroadcastChannel(channel.name);
-          displayBroadcastChannel(channel.name);
         }
 
         // change listening "color"
@@ -532,7 +502,6 @@ define(
           var attribute = comp.closest(".subscription-option").attr("title");
           if(attribute) {
             element.setSubscription(channel.name, attribute);
-            displayListenChannel(attribute);
           }
 
         }
