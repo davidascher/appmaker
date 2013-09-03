@@ -47,7 +47,7 @@ app.get('/testapp', routes.testapp);
 // Server-side gen of ID since we'll likely eventually use this for persistance
 app.get('/store/uuid', function (req, res) {
   res.setHeader('Content-Type', 'text/plain');
-  res.send(uuid.v1());
+  res.send(uuid.v4());
 });
 
 function nopublish(req, res) {
