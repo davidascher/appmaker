@@ -1,32 +1,30 @@
-<div class="tabs clearfix">
+<nav class="top-nav clearfix">
+  <div class="logo"></div>
   <div class="cards clearfix"></div>
   <button id="add-card" class="btn-add"></button>
-</div>
-
-<div class="container clearfix">
-
   <a target="_blank" class="publish-url"></a>
-  <button class="btn-std btn-md publish btn-critical">Publish</button>
-  <button class="btn-std btn-md new">New App</button>
-
   <div class="customize-btn"></div>
   <div class="note">
-    App Saved <span id="time"></span>
+    App auto-saved at <span id="time"></span>
   </div>
-
-  <div class="tray">
-    <div class="clearfix cats hidden">
-      <button class="btn-std btn-toggle on">Favorite</button>
-      <button class="btn-std btn-toggle">All</button>
-    </div>
+  <button class="btn-std btn-md publish btn-critical">Publish</button>
+  <button class="btn-std btn-md new">New App</button>
+</nav>
+<div class="tray">
+	<input type="search">
     <div class="library-list library-loading clearfix">
-
     </div>
-  </div>
+</div>
+<div class="container">
+  <div class="inner-container clearfix">
   <div class="listen-column">
+  	<div class="column-header">
+  		Incoming
+  	</div>
   </div>
   <div class="phone-container">
     <div class="phone-top"></div>
+    <div class="phone-border">
     <div id="flathead-app">
       <div class="ceci-card">
         <div class="fixed-top"></div>
@@ -35,32 +33,55 @@
         <div class="fixed-bottom"></div>
       </div>
     </div>
+    </div>
+    <div class="phone-shadow"></div>
     <div class="phone-bottom"></div>
   </div>
   <div class="broadcast-column">
+  	<div class="column-header">
+  		Outgoing
+  	</div>
   </div>
-
-  <div class="log-wrapper">
-    <div class="log">
-      <ul class="scroll"></ul>
-      <button class="small-btn log-toggle"></button>
-    </div>
-  </div>
-
+</div>
+</div>
+<div class="right-column">
+	<div class="editable-section">
+		<div class="name"></div>
+		<div class="section">
+			<h4>Mailboxes</h4>
+			<div class="mailboxes clearfix"></div>
+		</div>
+		<div class="section">
+			<h4>Outgoing Mail</h4>
+			<div class="outgoing-mail clearfix"></div>
+		</div>
+		<div class="section">
+			<h4>Customize</h4>
+			<div class="editable-attributes"></div>
+		</div>
+		<div class="delete-btn"></div>
+	</div>
+</div>
+<div class="log-wrapper">
+	<h4 class="log-header">Log</h4>
+	<div class="log">
+	  <ul class="scroll"></ul>
+	  <button class="log-toggle"></button>
+	</div>
 </div>
 
 <div class="channel-menu channel-menu-template">
   <div class="hover-helper"></div>
   <div class="channel-option subscription-option channel-template">
     <div class="color-ui">
-      <div name="false"     color="false"   class="color"></div>
       <div name="blue"      color="blue"    class="color"></div>
       <div name="green"     color="green"   class="color"></div>
-      <div name="purple"    color="purple"  class="color"></div>
+      <div name="yellow"    color="yellow"  class="color"></div>
+      <div name="orange"    color="orange"  class="color"></div>
       <div name="red"       color="red"     class="color"></div>
       <div name="pink"      color="pink"    class="color"></div>
-      <div name="orange"    color="orange"  class="color"></div>
-      <div name="yellow"    color="yellow"  class="color"></div>
+      <div name="purple"    color="purple"  class="color"></div>
+      <div name="false"     color="false"   class="color"></div>
     </div>
     <label><span class="channel-name"></span><div color="blue" class="chosen-color"></div></label>
   </div>
@@ -69,10 +90,25 @@
 
 <div class="modal-wrapper hidden">
   <div class="modal">
-    <div class="modal-inner">
-      <h2>Success!</h2>
-      <div class="clearfix">
-        Your app has been published to <a class="modal-publish-link"></a>
+    <div class="publishdialog modal-inner">
+      <div class="spinner hidden">
+        <h2>Loading…</h2>
+        <div class="clearfix">
+          Publishing your app on the internets.
+        </div>
+      </div>
+      <div class="failure hidden">
+        <h2>Uh-oh…</h2>
+        <div class="clearfix">
+          Your app couldn't be published.  The server said:
+          <pre class="message"></pre>
+        </div>
+      </div>
+      <div class="success hidden">
+        <h2>Success!</h2>
+        <div class="clearfix">
+          Your app has been published to <a class="modal-publish-link"></a>
+        </div>
       </div>
       <button class="btn-std return-btn">
         Return to app
@@ -81,3 +117,51 @@
   </div>
 </div>
 
+<div class="game-status">
+  <div class="wrapper level-finished">
+    <h2>Congratulations!</h2>
+    <h1>You completed Level <span class="level-number"></span></h1>
+    <div>
+    <p>You've been promoted to...</p>
+    <div class="player-rank"></div>
+    </div>
+    <a class="next-level green-button" href="#">Continue</a>
+    <div class="mailman-head"></div>
+  </div>
+
+  <div class="wrapper level-intro">
+    <h2 class="level-number"></h2>
+    <h1 class="level-name"></h1>
+
+    <div class="level-indicator">
+      <div class="level-progress"></div>
+      <div class="current-level"></div>
+    </div>
+
+    <h3 class="objective">Your Mission</h3>
+    <div class="step-list"></div>
+    <a class="start green-button" href="#">START</a>
+    <div class="sub-links">
+    <a class="optout" href="#">I don't want to play :(</a> - <a class="restart" href="#">Start Over</a>
+    </div>
+    <div class="mailman-head"></div>
+  </div>
+
+  <div class="wrapper game-finished">
+    <h2>You win!</h2>
+    <h1>You've been promoted to Postmaster!</h1>
+    <p>Go forth and build apps!</p>
+    <a class="green-button endgame" href="#">I'm Ready</a>
+  </div>
+
+  <div class="wrapper level-status">
+    <a class="optout" href="#">I quit!</a>
+    <a class="show-hints" href="#"></a>
+    <div><span class="level-number"></span> - <span class="level-name"></span></div>
+    <div class="step-list"></div>
+    <div class="hint">
+      <strong>Hint:</strong> <span class="hint-text">What you gotta do, is what you gotta do!</span>
+      <div class="arrow"></div>
+    </div>
+  </div>
+</div>

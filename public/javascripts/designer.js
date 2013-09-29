@@ -9,6 +9,10 @@ define(
 
     var selection = [];
 
+    Ceci.registerCeciPlugin('onElementRemoved', function(element){
+      $(document).off("click", ".color-ui .color", element.onColorSelectFunction);
+    });
+
     if (localStorage.draft){
       $('#flathead-app').html(localStorage.draft);
     }
@@ -37,8 +41,10 @@ define(
     var sortableOptions = {
       accept: '.draggable',
       distance : 10,
+      tolerance : "pointer",
       connectWith: ".drophere",
       placeholder: "ui-state-highlight",
+      handle : ".handle",
       start : function() { $(".phone-container").addClass("dragging"); },
       stop : function() { $(".phone-container").removeClass("dragging"); },
       receive: function (event, ui) {
@@ -66,47 +72,22 @@ define(
           selectComponent($(evt.currentTarget));
         });
 
-        component.append($('<div class="component-menu"><div class="customize-btn"></div><div class="delete-btn"></div></div>'));
         component.append($('<div class="handle"></div>'));
-        component.append($('<div class="editables-section"><div class="editable-attributes"></div></div>'));
 
         selectComponent(component);
       },
       onload: function (components) {
-        Object.keys(components).sort().forEach(function (name) {
-          var component = components[name];
-
-          var thumb = $('<div class="clearfix draggable" name="' + name + '" value="' + name + '"><div class="thumb" value="' + name + '">' + name.replace('app-', '') + '</div><div class="info-btn hidden"></div></div>');
-          $('.library-list').append(thumb);
-          thumb.draggable({
-            connectToSortable: ".drophere",
-            helper: "clone",
-            appendTo: document.body,
-            start: function(event, ui){
-              var clone = ui.helper;
-              $(clone).find(".thumb").addClass("im-flying");
-              clone.find('.info-btn').remove();
-            },
-            addClass: "clone"
-          });
-          if (component.description) {
-            var componentDescription = component.description.innerHTML;
-            thumb.attr('description', componentDescription);
-          } else {
-            thumb.attr('description', 'No description');
-          }
-        });
-
-        $('.drophere').sortable(sortableOptions);
-
+        this.sortComponents();
         Ceci.registerCeciPlugin("onChange", function(){
           if (saveTimer) {
             clearTimeout(saveTimer);
           }
           saveTimer = setTimeout(saveApp, 500);
         });
+        document.addEventListener("onselectionchanged", app.sortComponents);
 
         $('.library-list').removeClass("library-loading");
+        $('.drophere').sortable(sortableOptions);
       },
       onCardChange: function (card) {
         var thumbId = "card-thumb-" + card.id.match(/(\d+)$/)[0];
@@ -131,13 +112,105 @@ define(
       }
     });
 
+    function addThumb(component, name, list) {
+      var previewContent;
+      var preview = component.thumbnail;
+      if(preview === null){
+        previewContent = '<div class="missing-image">?</div>';
+      } else {
+        previewContent = preview ? preview.innerHTML : '';
+      }
+      var thumb = $('<div class="preview"><div class="draggable" name="' + name + '" value="' + name + '">'+ previewContent +'</div><div class="thumb" value="' + name + '">' + name.replace('app-', '') + '</div><div class="info-btn hidden"></div></div>');
+      list.append(thumb);
+      $('.draggable').draggable({
+        connectToSortable: ".drophere",
+        helper: "clone",
+        appendTo: document.body,
+        start: function(event, ui){
+          var clone = ui.helper;
+          $(clone).find(".draggable div").addClass("im-flying");
+          clone.find('.info-btn').remove();
+        },
+        addClass: "clone"
+      });
+
+      if (component && component.description) {
+        var componentDescription = component.description.innerHTML;
+        thumb.attr('description', componentDescription);
+      } else {
+        thumb.attr('description', 'No description');
+      }
+    }
+
+    app.sortComponents = function() {
+      var components = Ceci._components;
+      var sortedComponentNames = Object.keys(components);
+      sortedComponentNames.sort();
+      var fullList = $('.library-list');
+      fullList.html('');
+      fullList.append('<h4 class="suggested-components heading">Suggested</h4>');
+      var suggestionCount = 0;
+
+      var suggestions = [];
+      var suggestors =  [];
+      var friends = [];
+      var component;
+      var i,j;
+      for (i=0; i < selection.length; i++) {
+        suggestors.push(selection[i].localName);
+      }
+      for (i=0; i < suggestors.length; i++) {
+        component = suggestors[i];
+        friends = components[component].friends;
+        if (friends) {
+          for (j=0; j<friends.length; j++) {
+            suggestions.push(friends[j]);
+          }
+        }
+      }
+      var card = Ceci.currentCard;
+      for (i=0; i < card.elements.length; i++) {
+        component = card.elements[i];
+        friends = component.friends;
+        if (friends) {
+          for (j=0; j<friends.length; j++) {
+            suggestions.push(friends[j]);
+          }
+        }
+      }
+      /* these are what we suggest with a blank app */
+      // suggestions.push('app-fireworks');
+      // suggestions.push('app-button');
+      var alreadyMadeSuggestions = {};
+      var suggestion;
+      for (i = 0; i < Math.min(10, suggestions.length); i++) {
+        suggestion = suggestions[i];
+        if (suggestion in alreadyMadeSuggestions) continue;
+        addThumb(components[suggestion], suggestion, fullList);
+        alreadyMadeSuggestions[suggestion] = true;
+      }
+      fullList.append('<div class="lb"></div>');
+      sortedComponentNames.forEach(function (name) {
+        addThumb(components[name], name, fullList);
+      });
+    };
+
     var saveApp = function(){
       localStorage.draft = app.serialize();
 
       var now = new Date();
-      now = now.getHours() + ':' + now.getMinutes() + ":" + now.getSeconds();
+      var hours = now.getHours();
+      var minutes = now.getMinutes();
+      var seconds = now.getSeconds();
+      hours = (hours < 10) ? "0" + hours : hours;
+      minutes = (minutes < 10) ? "0" + minutes : minutes;
+      seconds = (seconds < 10) ? "0" + seconds : seconds;
 
+      now = hours + ':' + minutes + ":" + seconds;
+
+      $('.note').show();
       $('#time').text(now);
+
       console.log('Draft saved:', now);
     };
 
@@ -161,9 +234,11 @@ define(
     // empty the list of currently selected elements on the page
     var clearSelection = function() {
       selection = [];
-      $(".editables-section").hide();
+      $(".editable-section").hide();
       $(".phone-container .selected").removeClass("selected");
       $(".inspector").addClass('hidden');
+      var event = new Event('onselectionchanged');
+      document.dispatchEvent(event);
     };
 
     var disableReorder = function() {
@@ -212,11 +287,13 @@ define(
     });
 
     $(document).on("mousedown",'.delete-btn',function () {
-      var elements = selection.slice();
+      if(confirm("Delete this component?")){
+        var elements = selection.slice();
         clearSelection();
         elements.forEach(function(element) {
           element.removeSafely();
         });
+      }
     });
 
     var getPotentialListeners = function(element) {
@@ -297,7 +374,7 @@ define(
 
     var displayAttributes = function(element) {
 
-      var attributeList = $(element).find(".editable-attributes");
+      var attributeList = $(".editable-attributes");
 
       attributeList.html("");
 
@@ -309,8 +386,8 @@ define(
         attributeList.append(uiElement);
       });
 
-      var editables = $(element).find(".editable-section");
-      editables.append(attributeList);
+      var editables = $(".editable-section");
+      editables.show();
     };
 
     //Toggle customize
@@ -405,6 +482,51 @@ define(
       // $(this).closest(".channel-menu").remove();
       $(this).parent().hide();
     });
+    function clearLog() {
+      document.querySelector('.log .scroll').innerHTML = '';
+      Ceci.log("New app, clean log.");
+    }
+    document.addEventListener('log', function(event) {
+      try {
+        var scroll = $('.log .scroll');
+        var eltthum;
+        if (event.detail.speaker) {
+          eltthum = $("<a class='speaker' elementid='" + event.detail.speaker.id + "'>" + event.detail.speaker.localName.replace('app-', '') + "</a>");
+          eltthum.on('click', function(elt) {
+            var eltid = elt.currentTarget.getAttribute('elementid');
+            var newelt = $("#" + eltid)[0];
+            Ceci.elementWantsAttention(newelt);
+            selectComponent($(newelt));
+          });
+        }
+        var line = $('<li></li>');
+        var channelthumb;
+        if (event.detail.channel) {
+          var channel = getChannelByChannelName(event.detail.channel);
+          channelthumb = $("<span class='channel'></span>");
+          channelthumb.css('backgroundColor', convertHex(channel.hex, 70));
+        } else {
+          channelthumb = $("<span class='channel'>&nbsp;</span>");
+          channelthumb.css('backgroundColor', "#31353C");
+        }
+        line.append(channelthumb);
+        var payload = $("<div class='payload new'/>");
+        if (eltthum) payload.append(eltthum);
+        payload.append(" <span class='message'>" + event.detail.message + "</span>");
+        line.append(payload);
+        scroll.append(line);
+        payload.focus(); // needed for bg animation
+        payload.removeClass('new');
+        if (event.detail.severity == Ceci.LOG_WTF) {
+          line.addClass('severity').addClass('wtf');
+        }
+        scroll[0].scrollTop = scroll[0].scrollHeight;
+      } catch (e) {
+        console.log(e);
+        console.log(e.message);
+      }
+    });
+    Ceci.log("AppMaker designer is ready.", "");
 
     var selectComponent = function(comp) {
 
@@ -425,6 +547,8 @@ define(
       if(comp[0] != selection[0]){
         clearSelection();
         selection.push(comp[0]);
+        var event = new Event('onselectionchanged');
+        document.dispatchEvent(event);
         setTimeout(function(){
           displayAttributes(comp[0]);
         },0);
@@ -473,8 +597,23 @@ define(
       element.onColorSelectFunction = onColorSelectFunction;
 
       var componentName = element.tagName.toLowerCase();
-      $(".editables-section .name").text(componentName);
-      $(".inspector").removeClass('hidden');
+      $(".editable-section .name").text(componentName);
+
+      //add mailbox info to right column
+      $('.mailboxes').html('');
+
+      for (var i=0; i < element.subscriptions.length; i++) {
+        var channelProperty = element.subscriptions[i].listener;
+        var mailboxColor = element.subscriptions[i].channel;
+        var mailbox = $('<div class="mail"></div>').html(channelProperty).addClass(mailboxColor);
+        $('.mailboxes').append(mailbox);
+      }
+
+      //add outgoing mail info to right column
+      $('.outgoing-mail').html('');
+      var mailColor = element.broadcastChannel;
+      var outgoingMail = $('<div class="mail">Mail</div>').addClass(mailColor);
+      $('.outgoing-mail').append(outgoingMail);
     };
 
     //shows component description
@@ -496,6 +635,12 @@ define(
     });
 
 
+    $('.new').click(function(){
+      $('.card').remove();
+      clearSelection();
+      app.clear();
+      clearLog();
+    });
 
     $('.publish').click(function(){
 
@@ -503,21 +648,31 @@ define(
         data: { manifest: app.toJSON() },
         type: 'post',
         success: function (data) {
+          $(".publishdialog .failure").hide();
+          $(".publishdialog .spinner").hide();
           $('.publish-url').html(data.install);
           $('.publish-url').attr('href', data.install);
           $('.modal-publish-link').html(data.install);
           $('.modal-publish-link').attr('href', data.install);
+          $(".publishdialog .success").show();
           console.log('From publisher: ', data);
         },
         error: function (data) {
+          $(".publishdialog .spinner").hide();
+          $(".publishdialog .success").hide();
+          $(".failure .message").html(data.responseJSON.error.message);
           console.error('Error while publishing content:');
           console.error(data);
+          $(".publishdialog .failure").show();
         }
       });
     });
 
     //Publish modal
     $('.publish').click(function () {
+      $(".publishdialog .failure").hide();
+      $(".publishdialog .success").hide();
+      $(".publishdialog .spinner").show();
       $('.modal-wrapper').addClass('flex');
     });
 
